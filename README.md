@@ -1,2 +1,3 @@
-# Text To Image
-Text to Image Conversion through direct code, and step by step building
+# Text To
+Text to Image Conversion through direct code, and through VAE.
+Text to video
