@@ -1,2 +1,2 @@
-# Text To
-Text to Image Conversion through direct code, and through VAE and Text to video.
+# Computer Vision and GenAI
+This is the work I have done in Computer Vision and GenAI at DRDO Young Scientist AI Lab, Bengaluru.
