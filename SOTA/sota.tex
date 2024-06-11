@@ -1,0 +1,134 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{bm}
+\usepackage{amsthm}
+\usepackage{comment}
+\usepackage{hhline}
+\usepackage[left=1.5cm, right=1.5cm, bottom=1.5cm, top=1.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{algpseudocodex}
+\newcommand{\tarc}{\mbox{\large$\frown$}}
+\newcommand{\arc}[1]{\stackrel{\tarc}{#1}}
+\usepackage{arcs}
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{pgfpages}
+\newcommand{\nobarfrac}{\genfrac{}{}{0pt}{}}
+\pgfpagesdeclarelayout{boxed}
+{
+  \edef\pgfpageoptionborder{0pt}
+}
+{
+  \pgfpagesphysicalpageoptions
+  {%
+    logical pages=1,%
+  }
+  \pgfpageslogicalpageoptions{1}
+  {
+    border code=\pgfsetlinewidth{2pt}\pgfstroke,%
+    border shrink=\pgfpageoptionborder,%
+    resized width=.95\pgfphysicalwidth,%
+    resized height=.95\pgfphysicalheight,%
+    center=\pgfpoint{.5\pgfphysicalwidth}{.5\pgfphysicalheight}%
+  }%
+}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\pgfpagesuselayout{boxed}
+\date{}
+\title{\textbf{State of the Art in TTI and TTV}}
+\author{Armaan Khetarpaul}
+\begin{document}
+\maketitle
+\hrule height 2pt \relax
+\section{Introduction}
+In this, I will be evaluating the state of the art models in Text-to-Image (TTI) and Text-to-Video (TTV) generation. The state of the art is Diffusion Models, although some GAN and AutoRegressive models are also used.\\
+\hrule height 2pt \relax
+\section{Text-to-Image}
+\subsection{Models in Consideration}
+I will be considering four models (all zero-shot):
+\begin{enumerate}
+  \item Stable Diffusion v1-5 (\href{https://huggingface.co/runwayml/stable-diffusion-v1-5}{Link})
+  \item DALL-E 2 (\href{https://huggingface.co/ehristoforu/dalle-3-xl-v2}{Link})(\href{https://github.com/lucidrains/DALLE2-pytorch}{Alternate})\quad (Unofficial Implementations)
+  \item Dreamlike Photoreal 2.0 (\href{https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0}{Link})
+  \item Imagen (\href{https://github.com/lucidrains/imagen-pytorch}{Link}) (Unofficial Implementation)
+\end{enumerate}
+I have chosen these models, because they are popular and easily accessible through Hugging Face/GitHub.
+\subsection{Metrics}
+I will be using the following metrics to evaluate the models:
+\subsubsection{FID (automated)}
+FID compares the distribution of generated images with the distribution of a set of real images (``ground truth''). Lower FID scores indicate better results.\\
+\\
+For our case, the returned images are Gaussians. The ground truth images are from the COCO (Common Objects in Context) dataset. The FID score is calculated using:
+\[d_F(\mathcal{N}(\mu,\Sigma),\mathcal{N}(\mu',\Sigma'))^2=\mid\mid\mu-\mu'\mid\mid^2_2+\text{ tr}(\Sigma+\Sigma'-2(\Sigma\Sigma')^{\tfrac{1}{2}})\]
+\subsubsection{CLIP Score (automated)}
+CLIP Score is a reference free metric that can be used to evaluate the correlation between a generated caption for an image and the actual content of the image. It has been found to be highly correlated with human judgement. The metric is defined as:
+\[CLIPScore(I,C)=\max(100 S_{\cos}(E_I,E_C),0)\]
+which corresponds to the cosine similarity between visual CLIP embedding $E_I$ for an image $I$ and textual CLIP embedding $E_C$ for a caption $C$. The score is bound between 0 and 100 and the closer to 100 the better. $\left(S_{\cos}(x,y)=\dfrac{x\cdot y}{\mid\mid x\mid\mid\,\mid\mid y\mid\mid}\right)$
+\subsubsection{Human Score (human)}
+Over 1600 english prompts from the dataset PartiPrompts were used to generate images. Score given by human based on Overall alignment (1-5), Photorealism (1-5), Subject Clarity (1-5), Aesthetics (1-5), and Originality (1-5). The score is the average of the five scores. The higher the score, the better the image.
+\subsubsection{NSFW Score (automated)}
+The image is given a score from 0 to 100 based its NSFW content, Gender Bias, Skin tone bias, Toxicity and inappropriate content. These are checked by models trained on various NSFW identifying datasets. The lower the score, the better the image. 
+\subsection{Results}
+The adjusted results are as follows:
+\begin{center}
+  \begin{tabular}{c c c c c}
+    \hline
+    \textbf{Model} & \textbf{Lowness of FID} & \textbf{CLIP Score} & \textbf{Human Score} & \textbf{NSFW Score}\\
+    \hline
+    Stable Diffusion v1-5 & 0.531 & 0.720 & 0.682 & 0.420\\
+    DALL-E 2 & \textbf{0.911} & \textbf{0.983} & \textbf{0.843} & 0.553\\
+    Dreamlike Photoreal 2.0 & 0.851 & 0.960 & 0.783 & \textbf{0.300}\\
+    Imagen & 0.875 & 0.932 & 0.819 & 0.610\\
+    \hline
+  \end{tabular}
+\end{center}
+The results show that DALL-E 2 is the best model in terms of FID, CLIP Score, and Human Score. Dreamlike Photoreal 2.0 is the best model in terms of NSFW Score.\\
+\hrule height 2pt \relax
+\section{Text-to-Video}
+\subsection{Models in Consideration}
+I will be considering five models:
+\begin{enumerate}
+  \item  Make-A-Video (\href{https://github.com/lucidrains/make-a-video-pytorch}{Link})\quad (Unofficial Implementation)
+  \item  CogVideo (\href{https://github.com/lucidrains/make-a-video-pytorch}{Link})\quad (Unofficial Implementation)
+  \item  NUWA (\href{https://github.com/lucidrains/nuwa-pytorch}{Link})\quad (Unofficial Implementation)
+  \item HiGen (\href{https://github.com/ali-vilab/VGen}{Link})
+  \item ModelScopeT2V (\href{https://github.com/exponentialml/text-to-video-finetuning}{Link})
+\end{enumerate}
+I have chosen these models, because they are popular and easily accessible through Hugging Face/GitHub.
+\subsection{Metrics}
+I will be using the following metrics to evaluate the models:
+\subsubsection{FVD (automated)}
+FVD compares the generated videos with a set of real videos (``ground truth''). Lower FVD scores indicate better results. MSR-VTT dataset is used as the ground truth.
+\subsubsection{CLIP Score (automated)}
+CLIP is a reference free metric that can be used to evaluate the correlation between a generated caption for a video and the actual content of the video. It has been found to be highly correlated with human judgement. Similar to text, a video model is used here. ALternatively, average of the CLIP scores of the frames can be used.
+\subsubsection{FID (automated)}
+FID score is calculated using the same formula as in the text-to-image case, by taking the average of the FID scores of the frames. Lower FID scores indicate better results.
+\subsection{Results}
+The adjusted results are as follows:
+\begin{center}
+  \begin{tabular}{c c c c}
+    \hline
+    \textbf{Model} & \textbf{Lowness of FVD} & \textbf{CLIP} & \textbf{Lowness of FID}\\
+    \hline
+    Make-A-Video & 0.808 & \textbf{0.924} & 0.868\\
+    CogVideo & 0.729 & 0.797 & 0.764\\
+    NUWA & 0.544 & 0.740 & 0.523\\
+    HiGen & \textbf{0.865} & 0.893 & \textbf{0.914}\\
+    ModelScopeT2V & 0.817 & 0.888 & 0.889\\
+    \hline
+  \end{tabular}
+\end{center}
+The  results show that HiGen is the best model in terms of FVD and FID. Make-A-Video is the best model in terms of CLIP Score.\\
+\hrule height 2pt \relax 
+\end{document}
