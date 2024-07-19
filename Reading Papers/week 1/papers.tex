@@ -1,0 +1,743 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsbsy}
+\usepackage{bm}
+\usepackage{amsthm}
+\usepackage{comment}
+\usepackage{hhline}
+\usepackage[left=1.5cm, right=1.5cm, bottom=1.5cm, top=1.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{algpseudocodex}
+\newcommand{\tarc}{\mbox{\large$\frown$}}
+\newcommand{\arc}[1]{\stackrel{\tarc}{#1}}
+\usepackage{arcs}
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{pgfpages}
+\newcommand{\nobarfrac}{\genfrac{}{}{0pt}{}}
+\pgfpagesdeclarelayout{boxed}
+{
+  \edef\pgfpageoptionborder{0pt}
+}
+{
+  \pgfpagesphysicalpageoptions
+  {%
+    logical pages=1,%
+  }
+  \pgfpageslogicalpageoptions{1}
+  {
+    border code=\pgfsetlinewidth{2pt}\pgfstroke,%
+    border shrink=\pgfpageoptionborder,%
+    resized width=.95\pgfphysicalwidth,%
+    resized height=.95\pgfphysicalheight,%
+    center=\pgfpoint{.5\pgfphysicalwidth}{.5\pgfphysicalheight}%
+  }%
+}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+
+\pgfpagesuselayout{boxed}
+\date{}
+\title{\textbf{LLMs in GT, Racial Bias, Diplomacy and piKL}}
+\author{Armaan Khetarpaul}
+\begin{document}
+\maketitle
+\hrule height 2pt \relax
+\section{LLMs in GT}
+\subsection{Can Large Language Models Serve as Rational Players in Game Theory?
+A Systematic Analysis}
+\subsubsection{Introduction}
+Three games (dictator game, RPS, and ring-network game) are used to analyse behaviour of LLMs
+\subsubsection{Experiments}
+\subsubsection*{Can LLMs build a Clear Desire?}
+\textbf{The Dictator Game:} Dictator has two allocation options, recipient must accept.
+\[\pi^*(a|\mathcal{I})=\underset{a\in\{X,Y\}}{argmax}\{D(X,\omega_{\mathcal{I}}), D(X,\omega_{\mathcal{I}})\}\]
+Four preference types: \textit{Equality, Common Interest, Selfishness, and Altruism}. In game theory, SI and EQ are the most common preferences, followed by CI, while AL hardly
+ever occurs.\\
+Preferences are assigned to LLM, plays 3 games, repeated 10 times.\\
+\begin{center}
+  \includegraphics*{tabl1.png}
+\end{center}
+When assigned common preferences (EQ and SI), all
+three LLMs made preference-consistent choices in all experiments, demonstrating the basic ability of LLMs to build
+clear desires from textual prompts. However, LLMs performed poorly when given uncommon preferences (CI and
+AL). Mathematical ability of LLMs assigned different preferences would be significantly different (GPT-3 and GPT-3.5). \textbf{LLMs have the basic ability to build clear desires based on textual prompts, but struggle to build desires from uncommon preferences.}
+\subsubsection*{Can LLMs Refine Belief?}
+\textbf{Rock-Paper-Scissors:} LLMs play RPS. Optimal strategy for round $t$:
+\[\pi^*(a^t_m|\mathcal{I})=\underset{a^t_m\in \mathcal{A}}{argmax}\mathbb{E}_{a^t_o\sim p(\Omega_{\{a^{<t}_o,a^{<t}_m\}})}\left[D(a^t_o,a^t_m)\right]\]
+\begin{center}
+  \includegraphics*{table2.png}
+\end{center}
+4 opponent patterns. For constant, we perform 3 experiments (R, P and S). For loop 2, we perform 3 experiments (R-P, P-S, S-R). For loop 3 we perform one experiment (R-P-S). For markov, we perform two experiments copy and counter. Finally we perform experiment with preference distributions as (0.7,0.15,0.15) for RPS.
+\textbf{Analysis:}
+\begin{itemize}
+  \item  In the basic pattern (constant), GPT-3 performed close to random guessing, suggesting that GPT-3 lacked the basic ability to refine belief. In contrast, GPT3.5's average payoff was significantly higher than random guessing and continued to rise; GPT-4 consistently took correct actions after approximately 3 rounds.
+  \item For loop 2 and loop 3, GPT-3 and 3.5 struggled but GPT-4 performed well.
+  \item For markov the situation was not ideal, so all the LLMs struggled.
+  \item For the preference distribution, LLMs didn't recognize the pattern, and played randomly.
+\end{itemize}
+\textbf{Currently, the ability of LLMs to refine belief is
+still immature and cannot refine belief from many specific
+patterns (even if simple). However, GPT4 still had good results.}
+\subsubsection*{Can LLMs Take Optimal Actions?}
+\textbf{Ring-Network Game:} It's a 2 player game with both players having a payoff matrix. The characteristic of the ring-network game is that players' optimal action is determined sequentially by the other players' optimal actions.
+\[\pi^*(a_m|\mathcal{I})=\underset{a_m\in\{U,V\}}{argmax}\left[p(a_o|M)\cdot D_m(a_m|a_o,M)\right]\] 
+(my actions = $\{U,V\}$ opponent actions $\{X,Y\}$) M is payoff bimatrix. 3 forms of beliefs:
+\begin{itemize}
+  \item Implicit: $LLM(a_m|M)$
+  \item Given: $LLM(a_m|a_o,M)$
+  \item Explicit: Analyse and refine $LLM(a_o|M)$. And then play $LLM(a_m|a_o,M)$
+\end{itemize}
+We keep opponent's payoff matrix constant. 
+\begin{center}
+  \includegraphics*{table3.png}
+\end{center}
+We set up different player' payoff matrices, to adjust the difficulty of taking the optimal action: (a) is the original setup; (b) reduces the difference in
+payoffs while keeping the expected payoffs to $a_m \in \{U, V \}$
+constant; (c) increases the expected payoff for the incorrect action $a_m = U$; and (d) decreases the expected payoff for
+the correct action $a_m = V$.\\
+GPT-3 performed worse in all cases. All LLMs performed bad in Implicit belief. For Explicit belief, even though the LLMs could refine the beliefs (95\%), they were unable to make optimal actions on refined beliefs (70\%). But in the case of Given belief, GPT-4 was able to perform the optimal action consistently, and GPT-3.5 was able to perform the optimal action in 80\% of the cases.\\
+Two types of mistakes were made:
+\begin{itemize}
+  \item Belief is overlooked: LLMs are confused by the game information and thus overlook the refined belief to take the
+  optimal action in the subsequent dialogue.
+  \item Belief is modified: LLMs lack confidence in the refined
+  belief and thus modify the refined belief to take the optimal action in the subsequent dialogue.
+\end{itemize}
+\textbf{We consider that LLMs do not have the ability to
+autonomously follow human behavior in the game process. As a result, it is necessary to explicitly decouple human behavior for LLMs in game theory.}
+\subsubsection{Results}
+With the dictator game, we find that
+LLMs have the basic ability to build a clear desire. However,
+when assigned uncommon preferences, LLMs often suffer
+from decreased mathematical ability and inability to understand preferences. With Rock-Paper-Scissors, we observe
+that LLMs cannot refine belief from many simple patterns,
+which makes us pessimistic about LLMs playing games that
+require refining complex beliefs. Nonetheless, GPT-4 exhibits astonishingly human-like performance in certain patterns, able to become increasingly confident of refined belief
+as the game information increases. With the ring-network
+game, we consider that LLMs cannot autonomously follow
+the player's behavior. Explicitly decomposing the
+behavior in the game process can improve the ability of
+LLMs to take optimal actions, but the phenomenon of overlooking / modifying refined belief remains unavoidable in
+LLMs.
+In summary, our research systematicall
+\subsection{States as Strings as Strategies: Steering Language Models with Game-Theoretic Solvers}
+\subsubsection{Introduction}
+We consider extensive-form games (multiple players, dependent on history, etc.). We represent dialogues as a game by using states and assume perfect recall for each player.
+\subsubsection{Language as Strategy}
+We construct a version of Policy-Space Response-Oracles (PSRO) where an approximate best response can be generated by sampling new random prompt strings, evaluating them against the current equilibrium, and then returning the one with highest expected payoff. Some algorithms for this are:
+\begin{center}
+  \includegraphics*[scale = 0.5]{fig4.png}
+  \includegraphics*[scale = 0.5]{fig5.png}
+  \includegraphics*[scale = 0.5]{fig6.png}
+  \includegraphics*[scale = 0.5]{fig7.png}
+\end{center}
+OpenSpiel is a game theory engine with a large community of contributors.
+OpenSpiel provides several game-theoretic solvers already; this allows someone without experience
+in computational game theory to focus on the modelling of their dialogue game rather than how to
+design and implement a game solver
+\subsubsection{Games}
+Soome games using PSRO (Algorithm 5) using a shotgun approach for a best
+response operator (Algorithm 1) are:
+\begin{itemize}
+  \item \textbf{Scheduling a Meeting} Players attempt to schedule a meeting through a multi-turn negotiation. Each player begins with a set of allowable days of the week, i.e., days in
+  which they are available to meet: ``“Sunday'', ``“Monday'', . . . , ``“Saturday''. They also have non-negative
+  valuations over each day of the week (distinct from the allowable days). Both of these pieces of
+  information are private to the players. Players can choose to reveal this information if they wish.
+  Naturally, their actions here are the days of the week on which they propose to meet. The game
+  rewards players according to how much they value the agreed upon day, and receive zero reward if
+  no agreement is made.
+  \item \textbf{Trading Fruit}  Each player begins with a private endowment of fruit (i.e., a fruit basket)
+  as well as private valuations over types of fruit. Players are rewarded by the difference in value
+  between their basket after the trade and that before the trade. In addition, players can choose to adjust
+  the  ``tone'' of their negotiations.
+  \item \textbf{Public Debate} We present
+  two LLMs with an argument topic; one is tasked with arguing for the statement, one against. Each player's performance in the debate is scored between 0 and 1. We considered twenty different debate topics.
+\end{itemize}
+And we also explore an off-the-OpenSpiel-shelf counterfactual
+regret minimization (CFR) approach which we extend to unseen domains via imitation learning.
+\subsubsection{Experiments and Results}
+LLM base is PaLM 2 S. Evaluation requires
+assessing both our game-theoretic model as well as the performance improvement provided by game-theoretic solvers. 
+\subsubsection*{Evaluation as Game Models}
+Given an LLM generated a message $m$ conditioned on a prompt formatted with an action $a$, we would like to determine if $a$ is actually the most likely action conditioned on $m$ using a held-out
+model $p$, i.e., $a = \underset{z\in \mathcal{A}}{argmax}p(z|m)$. We use the same LLM as our held-out model $p$.
+\subsubsection*{Evaluation as Reward Models}
+It is difficult to extract from the natural language conversation the
+exact deal (or no deal) that is agreed upon with hand-coded parsing. One failure mode we noticed was that the LLM-based reward model would assume a trade
+agreement had been reached (and calculate the corresponding trade value) even when the final sent
+message was a counter proposal. As with many parts of this LLM-based game, any improvements
+in the language models, prompting, or dialogue flow can lead to improvements in the ability of the
+game to represent realistic interactions.
+\subsubsection*{Evaluation as Game-Theoretic Solvers}
+2 algorithmic approaches:
+\begin{itemize}
+  \item \textbf{Counterfactual Regret Minimization} We
+  simply call OpenSpiel's built-in counterfactual regret minimization (CFR) solver on our open sourced
+  chat\_game. We do this for many games, procedurally generated for both the debate and meeting scheduling (with days-of-the-week as actions) domains.
+  On average, we find that CFR returns an improved strategy over letting the LLM choose its responses without in-context direction (``any'' is passed to the LLM as an action in this case).
+  \begin{center}
+    \includegraphics*[scale = 0.5]{table8.png}
+  \end{center}
+  \item \textbf{Prompt-Space Response Oracles} Prompt-Space Response-Oracles (Algorithm 5) alternates between solving for an equilibrium of the
+  game and then approximating a best response to this equilibrium.
+  \begin{center}
+    \includegraphics*[scale = 0.5]{table9.png}
+  \end{center}
+  We solved for
+  this equilibrium using replicator dynamics. This game is general-sum,
+  in which case, replicator dynamics only guarantees convergence of the time average policy to a
+  coarse-correlated equilibrium (CCE).
+  \begin{center}
+    \includegraphics*[scale = 0.5]{table10.png}
+  \end{center}
+  ``Submissive'' is initially the most probable action at equilibrium, but equilibria are far from the only solution concepts proposed and studied in game theory. The Nash bargaining solution is the unique
+  solution to a two-person bargaining problem that satisfies the axioms of scale invariance, symmetry,
+  efficiency, and independence of irrelevant alternatives. In this case, NB and CCE
+  roughly agree in terms of their mixed strategies on the meeting scheduling domain.
+  \begin{center}
+    \includegraphics*[scale = 0.5]{table11.png}
+    \includegraphics*[scale = 0.5]{table12.png}
+  \end{center}
+\end{itemize}
+For the fruit trading game ``submissive'' initially holds the most mass under the CCE $(t = 0)$, however, it then gives way to more
+passionate tones such as ``assertive'', ``angry'', and ``enthusiastic'' that may benefit a more aggressive
+haggler. Inspecting Figure 6, it is interesting that ``calm'' is the final NB solution whereas ``assertive'',
+``angry'', and ``enthusiastic'' (and not ``calm'') are the predominant actions under the CCE. Both players
+may extract higher collective value if they remain ``calm'' during negotiations.
+\subsubsection*{Generalization Performance}
+\begin{center}
+  \includegraphics*[scale = 0.5]{fig13.png}
+\end{center}
+We generate 200 games using our procedural game generation approach above. For each game, we use 10 iterations of OpenSpiel's built-in counterfactual
+regret minimization (CFR) to solve for an equilibrium.  For each game, we save vector observations of each information state along with the optimal equilibrium policy returned by CFR for that infostate (imitation dataset). We then train a neural network policy to predict the equilibrium probabilities conditioned on the
+observations. Finally, we deploy this trained
+model against an LLM that only plays the action ``any'' on held out games.
+\begin{center}
+  \includegraphics*[scale = 0.5]{fig14.png}
+\end{center}
+We find that more mass lies on our CFR imitation policy under the equilibrium distribution implying it
+achieves higher payoff than the vanilla policy. Importantly, this implies our proposed approach results
+in an improved policy.
+\subsection{THE CONSENSUS GAME: LANGUAGE MODEL
+GENERATION VIA EQUILIBRIUM SEARCH}
+\subsubsection{Introduction}
+\textbf{Generative LM:} A modelling sitribution $P_{LM}(y|x,correct)$\\
+\textbf{Discriminative LM:} A modelling distribution $P_{LM}(v|y,x)$ where $v\in\{correct, incorrect\}$
+\subsubsection{The Consensus Game}
+A generator and a discriminator. Generator generates $v\in\{correct, incorrect\}$ and discriminator generates $y$, and produces a natural language string from a fixed set of candidates. Finally,
+this string is observed by the discriminator, who tries to guess the value of the correctness
+parameter by selecting one of $\{correct, incorrect\}$ as an answer. Both players obtain a payoff of
+1 if the discriminator correctly identifies the value of the correctness parameter, 0 otherwise.
+\[u_G(\pi_G,\pi_D)=\dfrac{1}{2}\sum_{v\in\{corrcet,incorrect\}}\sum_{y\in\mathcal{Y}}\pi_G(y|v)\cdot\pi_D(v|y)\]
+\[u_D(\pi_G,\pi_D)=\dfrac{1}{2}\sum_{v\in\{corrcet,incorrect\}}\sum_{y\in\mathcal{Y}}\pi_G(y|v)\cdot\pi_D(v|y)\]
+We wish to find an optimal pair of policies (Nash equilibria). However, Nash equilbria of the CONSENSUS GAME are not guaranteed to provide the second criterion
+of reasonableness. This is because the CONSENSUS GAME admits a multitude of Nash equilibria that
+are incompatible with the common-sense notion of truthfulness.\\
+Hence we add a regularization term to the utility functions, which penalize deviation from some pair of initial policies $\pi_G^1$ and $\pi_D^1$. The initial policies may be derived from an LM prompted
+with some initial string x, in order to obtain context-predictions.
+\[u_G(\pi_G,\pi_D)=-\lambda_GKL\left[\pi_G(\cdot|v);\pi_G^1(\cdot|x,v)\right]+\dfrac{1}{2}\sum_{v\in\{corrcet,incorrect\}}\sum_{y\in\mathcal{Y}}\pi_G(y|v)\cdot\pi_D(v|y)\]
+\[u_D(\pi_G,\pi_D)=-\lambda_DKL\left[\pi_D(\cdot|v);\pi_D^1(\cdot|x,v)\right]+\dfrac{1}{2}\sum_{v\in\{corrcet,incorrect\}}\sum_{y\in\mathcal{Y}}\pi_G(y|v)\cdot\pi_D(v|y)\]
+\textbf{Equilibrium Ranking:} Generating text by performing no-regret
+learning in the CONSENSUS GAME (training-free consensus-planning method). Regret is the gap between the chosen action and the best action
+in hindsight.\\
+\\
+\textbf{{Initial Policies:}}
+\[\pi_G^1(y|x,v) \propto \dfrac{P_{LM}(y|x,v)}{\sum_{v'}P_{LM}(y|x,v')}\]
+\[\pi_D^1(v|x,y) \propto \dfrac{P_{LM}(v|x,y)}{\sum_{y'}P_{LM}(v|x,y')}\]
+\textbf{Evolution of Policies:} We find the Nash Equilibrium by local regret minimization. We find that the local regret minimization problems are composed of a bilinear term, plus a strongly convex KL-regularization term. Such
+composite utilities can be handled by the piKL algorithm, which is specifically
+designed to perform regret minimization on KL-regularized objectives.
+\[Q_G^t(y|x,v):=\dfrac{1}{2t}\sum_{\tau=1}^{t}\pi_D^\tau(v|x,y)\]
+\[Q_D^t(v|x,y):=\dfrac{1}{2t}\sum_{\tau=1}^{t}\pi_G^\tau(y|x,v)\]
+Update:
+\[\pi_G^{t+1}(y|x,v)\propto exp \left\{\dfrac{Q_G^t(y|x,y)+\lambda_G\log \pi_G^1(y|x,v)}{1/(\eta_Gt)+\lambda_G}\right\}\]
+\[\pi_D^{t+1}(v|x,y)\propto exp \left\{\dfrac{Q_D^t(v|x,y)+\lambda_D\log \pi_D^1(v|x,y)}{1/(\eta_Dt)+\lambda_D}\right\}\]
+piKL algorithm guarentees:
+\begin{itemize}
+  \item Convergence to a Nash equilibrium
+  \item Regularization towards reasonableness (average policy remais close to initial)
+  \item Avoidance of regret
+\end{itemize}
+Equilibrium ranking returns $\pi_G^*$ and $\pi_D^*$, which are the optimal policies for the generator and discriminator. We can then use these policies to generate text.\\
+\subsubsection*{Experiments}
+\textbf{Hyperparameters:} $\eta_D=\eta_G=0.1$, $\lambda_D=\lambda_G=0.1$. Equilibrium ranking run for 5000 iterations.\\
+For generative tasks, top 50 responses were taken. LLaMa 7B and 13B were used.\\
+In the multiple-choice based datasets (ARC, RACE, HHH, MMLU), we consider the
+following approaches:
+\begin{itemize}
+  \item Generative Ranking (G): It ranks every candidate $y$ by $P_{LM}(y | x, correct)$ and picks the top candidate.
+  \item Mutual Information Ranking (MI): It is an ensemble-based approach that reweights every candidate $y$ by $P_{LM}(y\mid x, correct) \cdot P_{LM}(correct | x, y)$.
+  \item Self-Contrastive Ranking (SC): This approach utilizes the normalized generator $\pi^1_G$ to reweight every candidate $y$ by $\pi^1_G(correct|x,y)$.
+  \item Discriminative Ranking (D): This approach reweights every query-candidate pair $(x, y)$ by $\pi_D^*(correct|x,y)$.
+  \item Equilibrium Ranking Generator (ER-G): Similar to SC, this approach utilizes the final EQUILIBRIUM-RANKING-based generator $\pi^*_G$ to reweight every candidate $y$ by $\pi^*_G(correct|x,y)$.
+  \item Equilibrium Ranking Discriminator (ER-D): Similar to D, this approach utilizes the final EQUILIBRIUM-RANKING-based discriminator $\pi^*_D$ to reweight every query-candidate pair $(x, y)$ by $\pi^*_D(correct|x,y)$.
+\end{itemize}
+\subsubsection*{Results}
+\begin{center}
+  \includegraphics*[scale = 0.5]{table15.png}
+\end{center}
+\begin{itemize}
+  \item MMLU: For both LLaMA7B and LLaMA-13B, the EQUILIBRIUM-RANKING-based approaches matches or outperforms all
+  other baselines. In fact, zero-shot LLaMA-7B with ER-D (39.9) outperforms 5-shot LLaMA-7B
+  (35.1), while zero-shot LLaMA-13B with ER-D (45.1) is competitive with 5-shot LLaMA-13B
+  (46.9). LLaMA-7B with ER-D (39.9) even outperforms zero-shot GPT3-175B (37.7), while zero-shot LLaMA-13B with ER-D (45.1) outperforms 5-shot GPT3-175B (43.9).
+  \item ARC: On ARC-Easy, ER-D outperforms our implementation of generative ranking. We also note that
+  LLaMA-13B with ER-D (76.4) outperform all the baseline approaches and is even competitive with
+  the much larger PaLM-540B model (76.6). On ARC-Challenge, ER-D
+  significantly outperforms all the baseline approaches. We also note that LLaMA-7B with ER-D (58.3)
+  and LLaMA-13B with ER-D (61.4) outperforms even the much larger models: LLaMA-65B (56.0) and PaLM-540B (53.0) by up to 8\%.
+  \item RACE: On RACE-middle, like before, ER-D based
+  models outperforms all the baselines. We note that LLaMA-13B with ER-D (68.6) even outperforms
+  much larger models: LLaMA-65B (67.9) and PaLM-540B (68.1). On RACE-high, we have a similar story as with ARC-C. ER-D outperforms all baselines.
+  LLaMA-7B with ER-D (56.4) is able to significantly outperform much larger models: LLaMA-65B
+  (51.6) and PaLM-540B (49.1).
+  \item HHH: LLaMA-7B with ER-D outperforms baselines; although LLaMA-13B with
+  ER-D with the default parameter performs worse than discriminative ranking (D) (69.2), ER-D with
+  $\lambda_G = 0.01$ and $\lambda_D = 1.0$ achieves an accuracy of 70.6\%.
+\end{itemize}
+\begin{center}
+  \includegraphics*[scale = 0.7]{table16.png}
+\end{center}
+\textbf{TruthfulQA:} On this task, we consider greedy decoding in addition to our other
+ranking-based approaches. In this setting, 10 candidate sequences are sampled using nucleus and
+top-k sampling. These candidates are then ranked based on the approaches we described earlier.For a sequence $a$, the BLEU-Acc over reference correct candidates
+$b_{correct}$ and reference incorrect candidates $b_{correct}$ is computed as follows:
+\[BLEU-Acc(a):=\mathbb{I}(BLEU(a,b_{correct})>BLEU(a,b_{incorrect}))\]
+With LLaMA-7B, we observe only modest improvements for ER-G
+and ER-D over the greedy baseline. However, with LLaMA-13B, we note increased scores for
+both methods. This benchmark is known to exhibit negative scaling (performance
+drop as the model size increases). The performance difference with ER-G between LLaMA-7B and
+LLaMA-13B shows that EQUILIBRIUM-RANKING is in fact capable of mitigating this behavior.
+\begin{center}
+  \includegraphics*[scale = 0.7]{table17.png}
+\end{center}
+\textbf{GMS8K:} We generate 20 candidate reasoning paths sampled using nucleus and top-k
+using the 8-shot setup. We employ self-consistency over the candidate sequences, where we score each reasoning path with our baselines. Finally, we aggregate the scores for each answer corresponding to the reasoning paths and pick the answer with the highest score. We note that EQUILIBRIUM-RANKING-based
+approaches performs on par or slightly better compared to self-consistency (majority vote).
+\subsubsection{Results}
+The application of EQUILIBRIUM-RANKING-based approaches consistently yields
+improved results, surpassing or at least matching the performance of all baseline approaches across
+various tasks. This robustness is particularly interesting, as it demonstrates that EQUILIBRIUMRANKING is adept at handling diverse scenarios, even in situations when the initial GENERATOR or
+DISCRIMINATOR are not effective. Finally, we note that EQUILIBRIUM-RANKING demonstrates computational efficiency
+by eliminating the need for repetitive queries to language models.
+\section{Racial Bias}
+\subsection{Racial Bias within Face Recognition: A Survey}
+\subsubsection{Introduction}
+A face recognition system comprises a training set $D_{train}$ and a test set $D_{test}$. Any face dataset can
+be formed as $D = \{X,Y,S\}$ where $X$ denotes the set of images, $Y$ denotes the set of subject labels, and $S$ denotes the set of sensitive race or race-related labels. A mapping function $f$ plays a significant role in face recognition
+systems as it maps any given image $x$ into the feature embedding vector $z$. $f$ is selected from a function space $\Omega$ via a
+loss function $\mathcal{L}$ which measures the performance of a given training set, $D_{train}$, for any of the aforementioned face
+recognition tasks. 
+\[f^*=\underset{f\in\Omega}{argmin}(\mathcal{L}_{softmax}(f))\]
+Metrics:
+\begin{itemize}
+  \item \[Accuracy = \dfrac{TP+TN}{TP+TN+FP+FN}\]
+  \item \[TMR=\dfrac{TP}{TP+FN}\]
+  \item \[FMR=\dfrac{FP}{FP+TN}\]
+  \item \[TNMR=\dfrac{TN}{TP+FN}\]
+  \item \[FNMR=\dfrac{FN}{FP+TN}\]
+  \item ROC curve, plots TMR against FMR at different thresholds. 
+  \item Cosine similarity between embedding vectors.
+\end{itemize}
+Four most used fairness definitions:
+\begin{enumerate}
+  \item Fairness Through Unawareness requires that a machine learning algorithm have an independent
+  conditional probability $P$ of the output given $X$ from $S$ (racial labels).
+  \[P(Y|X)=P(Y|X,S)\]
+  \item Individual Fairness refers to treating similar individuals coequally, meaning that an algorithm is fair if
+  it gives similar predictions to similar individuals.
+  \item Group fairness (or Statistical parity / Demographic parity) enforces the predicted subject labels $\hat{Y}$
+  to be independent of $S$ which can be denoted $P(\hat{Y}|S = s) = P(\hat{Y}|S = s), s \in \{0, 1, \ldots,r \}$ where $r$ is the number of different sensitive race labels in the set.
+  \item Equal Opportunity, (or Equalised Odds) is satisfied if an algorithm predictions $\hat{Y}$ is independent of $S$
+  conditioned on $Y$.
+\end{enumerate}
+Causes of raical bias in data:
+\begin{itemize}
+  \item Race: Subject face images form the primary information source that encapsulates these race-related
+  biological and physical differences, which are then combined with additional information, including gender, age, pose,
+  facial expression and contextual aspects such as scene background, illumination, subject clothing and facial accessories
+  such as glasses, facial hair, jewellery and makeup. On this basis, it becomes possible to adopt any such ideology via the
+  use of racial groupings and classifications that are introduced to face recognition with the aim of quantifying racial bias. y four specific problems with the racial categories: (1) categories are not clearly defined
+  and are often loosely associated with geographic origin, (2) categories that are extremely broad, with continent-spanning
+  construction that results in individuals with vastly different physical appearance and ethnic backgrounds being grouped
+  incongruously into the same racial category, (3) categories narrow down the differences between ethnic groups with
+  distinct languages, cultures, separation in space and time, and phenotype into the same racial category. (4) assigning a
+  single racial category to a face example for performance evaluation of any form of automated analysis, including face
+  recognition, is not an ideal solution as it cannot capture a substantial proportion of the distribution of diversity and
+  variation within the human race.
+  \item Skin Tone: Skin tone scale grouping strategies alone carry various concerns for the mitigation of
+  racial bias within face recognition:
+  \begin{itemize}
+    \item Erroneous Skin Tone Annotation: Most skin tone scales are designed to measure skin tone on physical human
+    subjects in a medical or dermatological context. By contrast, face recognition systems instead used such annotations for
+    digitally captured face images that form part of the training and test data sets. Scene illumination, camera characteristics, demographic characteristics (race, age,
+    gender), and other factors (make-up, wearing glass, hairstyle, head pose), make it difficult to accurately measure skin tone in face images.
+    \item Narrow Representation of Scales: The most commonly used skin tone scales used for accessing aspects of racial
+    bias are either too narrow in terms of their discretisation of the skin tone spectrum to
+    facilitate capture of the foundational reasons for bias or alternatively offer the less representative capability for specific
+    groups.
+    \item Skin Tone as a Single Dimension of Race:  Solely aligning racial grouping with skin tone only transforms the racial
+    bias problem into a single-faceted problem. Moreover, there is no clear evidence that skin tone alone is the primary
+    driver for disparate false match rates within face recognition performance. considering other race-related facial attributes, including lips, eye, and face shape when measuring racial bias in this context in order to enable improved interpretation and derivation of bias factors.
+  \end{itemize}
+  \textbf{Binary Skin-Tone Scale:} . In order to model skin colour on imagery,
+  several studies proposed quantitative colour-space divisors (i.e. a dark-light pixel colour threshold) and simply
+  grouped skin colours into binary categories. In the racial bias context, many studies adopt such a darker-lighter skin tone
+  grouping by either narrowing the Fitzpatrick scale or dividing subject skin tone variance into binary categories.\\
+  \textbf{Fitzpatrick Scale:} The dermatologist Thomas B. Fitzpatrick developed his Fitzpatrick Skin Tone
+  Scale to assess the propensity of the skin to burn during photo-therapy (i.e. the treatment of skin conditions using
+  intense ultra-violet light sources). Initially, four different types ranging from Type I (always burns, does not tan) to
+  Type IV (rarely burns, tans with ease) were released. Later, he extended his scale to include a broader range
+  of skin types (Type V and IV) in order to offer a more granular representation across darker skin tones.\\
+  \textbf{Individual Typology Angle (ITA):} This method utilises the reflection of skin light via spectrophotometers
+  that measure $LaB$ colour values of the skin ($L$: Lightness. $a$: Red/Green Value. $b$: Blue/Yellow Value) to represent the
+  intensity of pigments such as carotene, haemoglobins, phaeomelanin, and eumelanin. Accordingly, Chardon proposes
+  six physiologically skin categories: {very light, light, intermediate, tan, brown, and dark} estimated via equation of ITA
+  $ITA = \arctan\left(\dfrac{L-50}{b}\right) \times \dfrac{180}{\pi}$.\\
+  \textbf{Monk Scale:} Most recently, the work of Ellis Monk produced a new 10-shade skin tone
+  scale designed to facilitate the construction of more representative datasets for the development of on-line consumer services. 
+  \item Facial Phenotype: Racial appearance bias as a negative disposition toward phenotypic variations in
+  facial appearance. Individuals with more stereotypical racial appearance suffer from poorer socioeconomic outcomes than those with less stereotypical
+  appearance for their race. A set of race-related facial phenotype attributes such as skin tone, nose shape, and lip shape are of primary interest
+  for quantifying and addressing racial bias in face recognition. Compared to the prevalence of race or skin tone categories, phenotype-based groupings have received less attention
+  across the racial bias literature to date, as they involve both skilled attribute labelling for dataset construction and a
+  significantly more complex evaluation strategy due to the significant number of phenotype categories, and phenotype
+  combinations present.
+\end{itemize}
+\subsubsection{Sources of Bias:}
+\textbf{Image Acquisition:}
+\begin{itemize}
+  \item Facial Imaging: Concerns about privacy, fairness, freedom and autonomy, and security.
+  \item Dataset Curation: Such a sampling
+  process is often affected by sampling bias, which significantly impacts racial bias in face recognition.
+  \item Dataset Bias Mitigation:
+  \begin{itemize}
+    \item Selection Bias which is same as sampling bias
+    \item Capture Bias occurs when the
+    dataset imagery contains targets (faces) that have minimal spatial and illumination variation and can be related with
+    pose bias within face recognition context, as there is still poor pose variance within datasets
+    \item Category/Label Bias poses the ill-definition or mislabelling of subject identities and racial categories
+    \item Negative Set Bias defines bias against target appearances that are not represented in the data set leading to recognition models that are overconfident and misrepresent performance by considering
+    only a skewed subset of possible real-world data samples.
+  \end{itemize}
+\end{itemize}
+\textbf{Face Localisation}\\
+Corrupted data is more likely to cause face detection errors in specific demographic groups. Confounding factors including facial orientation, illumination, and resolution, can cause
+such disparate performance among demographic groups. The presence of imaging, sampling and dataset bias within these face
+detection benchmark datasets again translates through the subsequent stages of face recognition resulting in skewed
+overall face recognition pipeline performance.\\
+\\
+\textbf{Facial Representation}
+\begin{itemize}
+  \item Backbone Architectures: Use of Diffusion-Convolutional Neural Networks (DCNNs). Each layer $t$ consists of $K$ kernels with weights $W = W_1, W_2, \ldots, W_K$ and added bias filters $B= b_1,\ldots, b_K$. Subsequently, each layer applies an element-wise nonlinear transform to generate multiple feature map representations and passes the result to the next layer $x_t = \sigma(W_K\cdot x_{t-1} + b_K)$. Moreover, at the end of each layer, a pooling function down-samples the feature
+  maps by taking the maximum or average value of adjacent pixels (patch).
+  \item Baseline Loss Functions: Good and easy to compute loss functions help in face recognition. cosface used:
+  \[\mathcal{L}_{cosface} = -\dfrac{1}{N}\sum_{i=1}^{N}\log\dfrac{e^{||z||(W^T_jz_i-m)}}{e^{||z||(W^T_jz_i-m)}+\sum_{j\neq y_i}^{n}e^{||z||(W^T_jz_i)}}\]
+  arcface used:
+  \[\mathcal{L}_{arcface} = -\dfrac{1}{N}\sum_{i=1}^{N}\log\dfrac{e^{||z||(W^T_jz_i+m)}}{e^{||z||(W^T_jz_i+m)}+\sum_{j\neq y_i}^{n}e^{||z||(W^T_jz_i)}}\]
+  Strongly dependent on choice of hyperparameters.
+  \item Mutual Information Mitigation: The high mutual information between facial identity and underlying racial
+  features within face images generally transfer into the learned feature embedding of contemporary DCNN based techniques and hence results in an unsatisfied fairness through unawareness criteria. Several techniques have been proposed to mitigate this issue, including adversarial learning, fairness-aware loss functions, and fairness-aware training strategies. Recent methods use knowledge distillation.
+  \item Loss Function Based Mitigation: Focuses on setting adaptive margins to
+  tackle racial bias. To fix this, the authors propose a novel loss function where the margin $m$ is adaptively set based on the racial label $s$ of the input image. Another approach, Asymmetric Rejection Loss aims to reduce the racial bias within trained face
+  recognition models by taking advantage of unlabelled images of under-represented groups.
+  \item Domain Adaptation Based Mitigation: These techniques use multiple labelled source domains with different distributions to improve
+  generalisation to new target datasets. Meta Learning: Synthesise the source/target
+  domain and force the model to learn effective representations of both synthesised source and target
+  domains. Cross-Domain Triplet (CDT) loss uses similarity metrics from one domain to learn compact feature clusters of identities by incorporating
+  them into another domain.
+\end{itemize}
+\textbf{Face Verification}\\
+Face verification
+performance is measured in terms of accuracy and matching rates over pairs of identical/nonidentical subject images in order to evaluate the number of correct identities matches over all the set of all paired
+images presented. In order to confirm a match, the feature embedding vector $z_{target}$ from a presented unseen subject. image instance $x_target$, and those of a subject image $x_{reference}$ held on record a priori, $z_{reference}$ , are compared using a distance or similarity score across the learnt feature embedding space. An apriori
+$threshold$ is used to make a decision on the similarity of $z_{target}\approx z_{reference}$ such that a verified identity can be confirmed or not. Significant performance on face verification on public benchmark datasets where the racial diversity within these datasets is often limited, biased and overlooked \\
+\\
+\textbf{Face Identification}\\
+The process involves comparing an obtained query face image $x_{target}$ with a large database of reference images $X_{enrolment}$. Face identification tasks can be sub-categorised as either closed-set, when the target is
+always in the enrolment set $(x_{target} \in X_{enrolment})$, or open-set, when the target may or may not be in the enrolment
+set ($x_{target} \in  X_{enrolment}$ or $x_{target} \notin X_{enrolment}$).  In order to perform a closed-set face identification task, a multi-class
+classifier is used to identify the target image $x_{target}$ via the use of feature embedding vector $z_{target}$ over $Z_{enrolment}$.\\
+\\
+\textbf{Evaluation Biases:}
+\begin{itemize}
+  \item Evaluation bias encourage the development of models that only perform
+  well on the specific racial groupings as the per distribution of the dataset. Evaluation bias is also related to
+  the decisions made at this stage of the face recognition pipeline, including pairing selection, threshold optimisation,
+  distance and normalisation functions. performance is highly dependent on the number
+of images available in a template. Performance is highly dependent on the number
+of images available in a template. 
+  \item Adversarial Gender De-biasing algorithm (AGENDA) trains a shallow network that removes the gender information of the embeddings extracted from
+  a pre-trained network, with PASS to deal with any sensitive attribute and proposed
+  a novel discriminator training strategy.
+  \item Fair Template Comparison (FTC)
+  method replaces the computation of the cosine similarity score by an additional shallow neural network trained
+  using cross-entropy loss, with a fairness penalisation and L2 penalty term to prevent over-fitting.
+  \item Group-specific threshold (GST) in which the sensitive attributes themselves
+  define its calibration sets.
+  \item Fair Score Normalisation (FSN) method, which is essentially
+  GST with unsupervised clusters. FSN normalises the scores by requiring the model FMRs across unsupervised clusters
+  to be the same predefined global FMR.
+  \item  Fairness Calibration (FairCal) method that applies
+  the K-means algorithm to the image feature representation vectors $Z$ and makes partitions of the embedding space
+  into $K$ clusters. For each set, it calculates separate calibration map scores to cluster-conditional probabilities of the
+  set. If the pair of images belong to the same subject cluster, the algorithm uses the score; if not, it uses the weighted
+  average of the calibrated scores in each cluster of corresponding image features.
+\end{itemize}
+Open-set face identification requires a threshold to report a match or non-matched
+decision over test target imagery. Two types of errors in face identification
+false-non-matched identification and false-matched identification together with their dependency on a threshold that
+defines the minimum similarity required to report a match.\\
+Designing an ideal evaluation strategy is yet another crucial step in the face recognition processing pipeline. This
+step becomes particularly important in order to address racial bias within face recognition, as every decision made at
+this stage can have a significant impact on the overall performance and performance across different groups. 
+\section{Diplomacy}
+\subsection{Introduction}
+In the game, seven players compete for majority control of 34 “supply centers” (SCs) on a map.
+On each turn, players simultaneously choose actions consisting of an order for each of their units to
+hold, move, support or convoy another unit. If no player controls a majority of SCs and all remaining
+players agree to a draw or a turn limit is reached then the game ends in a draw. In this case, we use
+a common scoring system in which the score of player $i$ is $C_i^2/\sum_{i'}C_{i'}^2$, where $C_i$ is the number of SCs player $i$ owns.\\
+Most recent successes in no-press Diplomacy use deep learning to imitate human behavior given a
+corpus of human games. Self-play approaches, actor-critic approaches, one-ply search, etc. have been used so far.\\
+Regularizing inference-time search techniques can produce agents
+that are not only strong but can also model human behaviour well. In the domain of no-press Diplomacy, they show that regularizing hedge with a KL-divergence
+penalty towards a human imitation learning policy can match or exceed the human action prediction
+accuracy of imitation learning while being substantially stronger.
+\textbf{Markov Game:} Interactive game where, actions are dependent only on the current state and not on the history of the game.\\
+\textbf{HEDGE:} It's an iterative algorithm that converges to a Nash equilibrium. 
+\[Q^t(a_i)=\dfrac{1}{t}\sum_{t'\leq t}u_i(a_i,a^{t'}_{-i})\]
+\[\pi_i^t(a_i)\propto exp(Q^{t-1}(a_i)/\kappa_{t-1})\]
+Regret Matching algorithm is not used here.\\ 
+It's inspired from DORA algorithm (an algorithm that is similar to past model-based
+reinforcement-learning methods)   except in place of Monte Carlo tree search, which is unsound in simultaneous-action games such as Diplomacy or other imperfect information games, it instead uses an equilibrium-finding algorithm such as hedge or RM to iteratively approximate a Nash equilibrium for the current state.
+\\ 
+A deep neural net trained to predict the policy is used to sample plausible actions for all players to
+reduce the large action space in Diplomacy down to a tractable subset for the equilibrium-finding
+procedure, and a deep neural net trained to predict state values is used to evaluate the results of
+joint actions sampled by this procedure. The idea of Nash-Q was used to compute
+equilibrium policies $\sigma$ in a subgame where the actions correspond to the possible actions in a current
+state and the payoffs are defined using the current approximation of the value function.\\
+A version of piKL algorithm (piKL-hedge) was used for behavioral cloning. The hyperparameter $\lambda$ was found to be better samples from a distribution $\beta$ over $\lambda$s, called DIL-piKL (Distribution Lambda piKL).
+\begin{center}
+  \includegraphics*{fig21.png}
+\end{center}
+\textbf{Theoretical Results:}\\
+\textbf{Theorem 1:} Let $W$ be a bound on the maximum absolute value of any payoff in the game, and $Q_i:= \tfrac{1}{n}\sum_{a\in A_i}\log \tau_i(a)$. Then, for any player $i$, type $\lambda_i \in \Lambda_i$, and number of iterations $T$, the regret cumulated can be upper bounded as
+\[\underset{\pi\in\Delta(A_i)}{max}\left\{\sum_{t=1}^{T}\tilde{u}_{i,\lambda_i}(\pi,a^t_{-1})\right\}\leq \dfrac{W^2}{4}min\{\dfrac{2\log T}{\lambda_i},T\eta\}+\dfrac{\log \eta_i}{\eta}+\rho_{i,\lambda_i}\]
+where $\rho_{i,\lambda_i}:=\lambda_i(\log \eta_i+Q_i)$.\\
+\\
+\textbf{Theorem 2:} When both players in a
+2 player 0 sum game learn using DiL-piKL for $T$ iterations, their policies converge almost surely to the unique
+Bayes-Nash equilibrium $(\pi^*_{i,\lambda_i})$ of the regularized game defined by utilities $\tilde{u}_{i,\lambda_i}$.\\
+\subsection{Model}
+By replacing the equilibrium-finding algorithm used in DORA with DiL-piKL, we obtain a new algorithm named RL-DiL-piKL, which can learn a strong and human-compatible policy as well as a value function that can accurately
+evaluate game states, assuming strong and human-like continuation policies. It's trained with the same loss function as DORA with a $\lambda$ distribution. At evaluation time we perform 1-ply lookahead where on each turn we sample up to 30 of the most likely actions for each player from the RL policy proposal network. The model will be called Diplodocus.
+\subsection{Experiments}
+\textbf{Algorithms:}
+\begin{itemize}
+  \item Diplodocus-Low: $\beta_i\sim Unif\{10^{-4},10^{-1}\}\forall i$
+  \item Diplodocus-High: $\beta_i\sim Unif\{10^{-2},10^{-1}\}\forall i$
+  \item DORA is an agent that is trained via self-play and uses RM as the search algorithm during training
+  and test-time.
+  \item DNVI is similar to DORA, but the policy proposal and value networks are initialized from human
+  BC pretraining.
+  \item DNVI-NPU is similar to DNVI, but during training only the RL value network is updated. The policy proposal network is still trained but never fed back to self-play workers, to limit self-play drift from human conventions.
+  \item BRBot is an approximate best response to the BC policy. It was trained the same as Diplodocus,
+  except that during training the agent plays one distinguished player each game with $\lambda = 0$ while all
+  other players use $\lambda = \infty$.
+  \item SearchBot, a one-step lookahead equilibrium search agent.
+  \item HedgeBot is an agent similar to SearchBot but using our latest architecture and
+  using hedge rather than RM as the equilibrium-finding algorithm.
+  \item FPPI-2 and SL are two agents.
+\end{itemize}
+Algo Tournament: These games used a time limit of 5 minutes per turn and a stochastic game-end rule where at the beginning of each game year between 1909 and 1912 the game ends immediately with 20\% chance per year, increasing in 1913 to a 40\% chance.
+\begin{center}
+  \includegraphics*[scale = 0.7]{table22.png}
+\end{center}
+Human Tournament: Each game had exactly one agent and six humans. The players were informed that there was an AI agent in each game, but did not know which player was the bot in each particular game. 5-minute long games were played.
+\begin{center}
+  \includegraphics*[scale = 0.7]{table23.png}
+\end{center}
+In addition to the tournament, we asked three expert human players to evaluate the strength of the agents in the tournament games based on the quality of their actions. Games were presented to these experts with anonymized labels so that the experts were not aware of which agent was which in each game when judging that agent's strategy.\\
+\\
+\textbf{Results:}
+For algo tournament,  Diplodocus-Low and Diplodocus-High perform the best by a wide margin.\\
+\\
+For human tournament, results show that Diplodocus-High performed best among all the humans by both Elo and average score. Diplodocus-Low followed closely behind, ranking second according to average score
+and third by Elo. BRBot performed relatively well, but ended ranked below that of both DiL-piKL agents and several humans. DORA performed relatively poorly. Two participants achieved a higher average score than the Diplodocus agents, a player averaging 35\% but who only played two games, and a player with a score of 29\% who played only one game.\\
+\\
+For expert evaluation, All the experts picked a Diplodocus agent as
+the strongest agent, though they disagreed about whether Diplodocus-High or Diplodocus-Low was
+best. Additionally, all experts indicated one of the Diplodocus agents as the one they would most like to cooperate with in a game.
+\subsection{RL Training}
+\begin{center}
+  \includegraphics*[scale = 0.7]{table24.png}
+\end{center}
+We compare different RL agents across the course of training by varying the training methods for the value and policy proposal networks, but using the same search
+setting at evaluation time.\\
+We found that agents without biasing techniques (DORA and DNVI) diverge from human
+play as training progress. By contrast, Diplodocus-High achieves significant improvement in score while keeping the human prediction accuracy high.
+\subsection{Compressed Models Decompress Race Biases: What
+Quantized Models Forget for Fair Face Recognition}
+Trying to use synthetic data to fix racial biases.
+\subsubsection*{Datasets}
+\begin{itemize}
+  \item \textbf{MS1MV2:} MS1MV2 is widely used in the literature to train and
+  compare several deep face recognition models. It is
+  a refined version of the original MS-Celeb-1M dataset,
+  which further improved the training of these systems. The
+  dataset contains 85k different identities and almost six million
+  images and it is not balanced with respect to the race.
+  \item \textbf{BUPT-Balancedface and BUPT-Globalface:} These datasets have been created
+  to mitigate race bias on face recognition through skin tone
+  labelling as African, Asian, Caucasian and Indian. BUPTGlobalface contains two million images from 38k different
+  identities, and the distribution of races follows their distribution in the world. On the other hand, BUPT-Balancedface
+  contains 1.3 million images from 28k identities which are
+  divided into 7k identities per race.
+  \item \textbf{Synthetic Data:} Approximately 500k
+  unlabelled synthetic images. These images have been generated by a generative adversarial network. Noise used as input to generate the images was sampled
+  from a Gaussian distribution and fed to a pretrained generator.
+  \item \textbf{LFW:} Racial Faces in-the-wild (RFW) was designed as a
+  benchmarking dataset for fair face verification. Similarly, it
+  includes labels for ethnicity, which allows for a fair assessment
+  of potential biases. It contains 3000 individuals with 6000
+  image pairs for face verification.
+\end{itemize}
+\subsection{Methods}
+First we checked if there's any bias in the various versions of QuantFace using MS1MV2 dataset.\\
+Next a ResNet-34 was trained
+on BUPT-Balancedface and a second ResNet-34 was trained
+on BUPT-Globalface. We further trained a ethnicity classifier
+on BUPT-Balancedface to estimate the ethnicity distribution
+in the synthetic data. This classifier comprises a fully-connect
+layer on top of a pretrained Elastic-Arc model [1] model and
+achieves accuracies above 95\%.
+\subsubsection{Experiments}
+The models were trained and the performance of the evaluated models was measures in
+terms of accuracy. For the fairness evaluation of these models
+we have utilised two metrics: the standard deviation between
+the different accuracies (STD), and the skewed error ratio
+(SER).
+\subsubsection{Results}
+\begin{center}
+  \includegraphics*[scale = 0.7]{table25.png}
+\end{center}
+Smaller models tend to have higher biases and lower performance in terms
+of average accuracy. ResNet-100 is an exception and this
+difference might be connected to the fact that SER becomes
+highly sensitive when the errors are below 1\%. The quantized version of these models seems to retain the
+performance and bias advantaged when compared to simpler
+models. However,
+the usage of synthetic data has shown, for all the different
+precisions, a capability to reduce the bias while retaining the
+performance. From this data, it is not clear if the improvement
+is due to a specific characteristic of the synthetic data.
+\begin{center}
+  \includegraphics*{table26.png}
+\end{center}
+Training two ResNet-34 on BUPT-Balancedface and
+BUPT-Globalface shows, at full precision, that despite a higher
+performance of the latter, the balance of the former is essential
+to ensure better bias metrics. On the model trained with the
+BUPT-Balancedface the versions quantized with synthetic data
+has not only kept the same tendency, but it has also surpassed by a large margin the version of
+the method quantized with the balanced data. The ResNet-34 trained on the BUPT-Globalface performs
+better if quantized with the data from the BUPT-Balancedface
+instead of using the data from training. 
+\section{piKL}
+\subsection{Dec-POMDP}
+A Dec-POMDP is $N$ agents indexed by $(1,\ldots,N)$, a state space $\mathcal{S}$, a joint action space $\mathcal{A}=\mathcal{A}^1\times \ldots \times \mathcal{A}^N$, a transition function $\mathcal{T}:\mathcal{S}\times \mathcal{A}\rightarrow \mathcal{S}$, a reward function $r:\mathcal{S}\times\mathcal{A}\rightarrow\mathbb{R}$ and a set of observation function $o^i=\Omega^i(s), s\in S\forall i$. Define a trajectory of true states until time step $t$ as $\tau_t=(s_0,a_0,r_0,\ldots,s_t)$, and it's AOH (action-observation history) for agent $i$ as $\tau_t^i=(o_0^i,a_0,r_0,\ldots,o_t^i)$. Agent policy $\pi^i(\tau_t^i)=P(a^i_t|\tau_t^i)$ maps each possible AOH to a distribution over the action space of that agent.\\
+\\
+Here a recurrent network is trained to model the expected total return for each action given the input AOH, $Q(\tau_t^i,a) = \mathbb{E}_{\tau\sim P (\tau_t|\tau^i_t)}R(\tau_t)$ where $R(\tau_t) = P_t'\geq t\gamma(t'-t)r_t$ is the sum of discounted future reward by unrolling the joint policy $\pi$ on the sampled true game trajectory until termination. The joint policy is the greedy policy derived from each agent's Q-function.\\
+\\
+SPARTA for search. Search agent $i$ keeps track of the belief $\mathcal{B}(\tau_t^i) = P(\tau_t|\tau_t^i,\pi^{-1})$, which is the distribution of the trajectory of states given the AOH and partners' policies.
+\[a^i_t=\underset{a}{argmax}Q_\pi(\tau_t^i,a)=\underset{a}{argmax}\mathbb{E}_{\tau_t\sim\mathcal{B}(\tau_t^i)}[r(\tau_t,a)+R_\pi(\tau_{t+1})]\]
+This learned belief search technique is used in piKL. The acctions are sampled from:
+\[P(a)\propto \pi_{anchor\,policy}(a|\tau_t^i)\cdot  exp\left[\dfrac{Q_{\pi_{roll(\text{Output of a search algorithm})}}(\tau_t^i,a)}{\lambda}\right]\]
+\subsection{piKL algorithm}
+\begin{center}
+  \includegraphics*[scale = 0.8]{fig18.png}
+\end{center}
+It first trains an imitation policy $\pi_{BC}$ via behavioral cloning on a dataset collected from the population of humans we
+want to model. Then piKL-IL iteratively improves a policy $\pi_{piKL-IL}$, alternating between generating
+higher quality data with piKL-LBS and training a better model using the generated dataset to produce a new $\pi_{piKL-IL}$. \\
+piKL has great accuracy (sometimes better than human), depending on $\lambda$. So a distribution of $\lambda$s is used to generate a spectrum of policies.\\
+For two players, we run single-agent piKL-LBS with learned
+beliefs independently for both players, or run on one player and use imitation learning.
+\subsection{piKl-BR}
+We train a policy $\pi_{piKL-BR}$ to be a best response to $\pi_{piKL-IL}$ via Q-learning, but we modify
+the Q-learning update as:
+\[Q(\tau_t^i,a_t)\leftarrow r_t(\tau_t,a)+\gamma\cdot Q(\tau_{t+1}^i,a'_{t+1})\]
+\[\text{where }a'_{t+1} = \underset{a}{argmax}\left[Q(\tau_{t+1}^i,a)+\lambda\cdot\log \pi_{BC}(\tau_{t+1}^i,a)\right]\]
+the exploration is $\epsilon$-Greedy$\left[Q(\tau_{t+1}^i,a)+\lambda\cdot\log \pi_{BC}(\tau_{t+1}^i,a)\right]$.\\
+When piKL-BR recieves an out of distribution input, it can produce bad results. This can be solved by returning piKL-LBS algorithm on top of it at test time, for producing $\pi_{roll}$
+\subsection{Experiments}
+2-Player Hanabi card game. (The deck
+consists of five color suits and each suit has ten cards divided into five ranks with three 1s, two 2s,
+two 3s, two 4s and one 5. At the beginning, each player draws five cards from the shuffled deck.
+Players can see other players’ cards but not their own. On each turn, the active player can either hint
+a color or rank to another player or play or discard a card. Hinting a color or rank, will inform the
+recipient which cards in their hand have that specific color/rank. Hinting costs an information token
+and the team starts with eight tokens. The goal of the team to play exactly one card of each rank 1
+to 5 of each color suit, in increasing order of rank, The order of plays between different color suits
+does not matter. A successful play scores the team one point while a failed play one costs one life.
+If all three lives are lost, the team will get 0 in this game, losing all collected points. The maximum
+score is 25 points. The team regains a hint token when a card is discarded or when a suit is finished
+(playing all 5 of a suit successfully). The player draws a new card after a play or discard move.
+Once the deck is exhausted, the game terminates after each player makes one more final move.)\\
+\\
+Human policy $\pi_h$ is trained using 240k 2-player games. After training, the converged $\pi_h$ gets 19.72 ± 0.10 in self-play and 63.63\% in prediction
+accuracy on the test set. In Hanabi, the belief model takes the same
+AOH $\tau_i$
+as the policy and returns a distribution over player $i$'s own hand. The hand consists of 5 cards and we can predict them sequentially from the oldest to the newest based on the time they
+are drawn. The belief network $\phi$ consists of an LSTM encoder to encode sequence of observations
+and an LSTM decoder for predicting cards autoregressively.\\
+\\
+We set $P(\lambda)$ to be a uniform mixture of Gaussian distributions $N (\mu, \sigma^2
+)$ truncated at $0$ and $2\mu$ with $(\mu, \sigma)$ =
+(1, 1/4),(2, 2/4),(5, 5/4),(10, 10/4) and each Gaussian is sampled with equal probability. We
+generate $d = 250K$ games in each iteration to train the new policy. In every LBS step,
+we perform $M = 10K$ Monte Carlo rollouts evenly distributed over $|A|$ legal actions. We sample $M/|A|$ valid private hands from the belief model to reset the simulator for rollouts. To better imitate policies under different $\lambda$s, we feed the $\mu$ of the Gaussian distribution
+from which the $\lambda$ is sampled to the policy network. Clearly, piKL-IL performs significantly better than $\pi_h$ and the
+score increases as regularization $\lambda$ decreases.\\
+\\
+The BR is trained under a standard distributed RL setup where many parallel workers generate data
+with cross-play between the training policy and the fixed IL policy. piKL-BR is
+better at collaborating with piKL-IL than piKL-IL itself and the gap shrinks as the regularization $\lambda$
+decreases.\\
+\\
+We run piKL-LBS on the piKL-BR policy with high regularization $\lambda = 2$. Imitation
+learning is used. Finally, we train an unregularized $\lambda = 0$ best response to the vanilla behavioral clone policy $\pi_{BC}$ as our baseline. This agent achieves $23.19 \pm 0.03$ in cross-play with $\pi_{BC}$ in convergence.
+\subsection{Results}
+2 experiments:
+\begin{enumerate}
+  \item Ad-hoc team play with a diverse group of players without any prior communication (zeroshot)
+  \begin{center}
+    \includegraphics*{table19.png}
+  \end{center}
+  Both BR-BC and piKL3 outperformed human experts in this task, indicating that playing with a diverse range of players in the zero-shot ad-hoc setting is challenging for humans. AI agents generally worked better with non-expert players, while experts have a clear lead when
+  collaborating with other experts. This is likely because experts' behaviors are more predictable and
+  the community has converged to a few well-known convention sets that are easy to identify for the
+  experts who follow them closely in forums and discussion channels.
+  \item  A group of expert players play multiple games with
+  piKL3 and the BR-BC baseline in alternating order to further differentiate the gap between them.
+  \begin{center}
+    \includegraphics*[scale = 0.7]{table20.png}
+  \end{center}
+  Although the improvement
+may seem small numerically, the mechanics of Hanabi makes it increasingly difficult to improve as
+the score gets closer to a perfect 25. piKL3 outperformed the BR-BC in terms of both average score and percentage of perfect games. piKL3 achideve more perfect games with the experts. Experienced human players are particularly excited about perfect games as they are often
+  significantly harder than getting 23 or 24 in a given deck.
+\end{enumerate}
+\hrule height 2pt \relax 
+\end{document}
